@@ -38,5 +38,24 @@ fn main() {
     eprintln!("Running partial suffix sort");
     let partial_SA = partial_suffix_sort::partial_suffix_sort(&seq_concat, *k);
 
+    let n = partial_SA.len();
+
+    let mut inverse_partial_SA = vec![0usize; n];
+
+    for i in 0..n{
+        inverse_partial_SA[partial_SA[i]] = i;
+    }
+
+    let mut kmer_run_start = 0 as usize;
+    for i in 0..n{
+        let text_pos = partial_SA[i];
+        if i > 0{
+            let prev_text_pos = partial_SA[i-1];
+            if seq_concat[text_pos..text_pos+k] != seq_concat[prev_text_pos..prev_text_pos+k]{
+                
+            }
+        }
+    }
+
 }
 
