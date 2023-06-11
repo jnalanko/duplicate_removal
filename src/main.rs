@@ -5,7 +5,7 @@ use std::io::{BufWriter};
 use std::str;
 use my_seqio::reader::{DynamicFastXReader, FastXReader};
 use my_seqio::writer::DynamicFastXWriter;
-use edlib_rs::edlibrs::*;
+use edit_distance;
 use core::cmp::{min,max};
 use std::collections::HashSet;
 
@@ -35,11 +35,11 @@ fn check_for_duplicates(doc_array: &Vec<usize>, cumul_seq_lengths: &Vec<usize>, 
             let s1 = extract_sequence(id1, seqs_concat, cumul_seq_lengths);
             let s2 = extract_sequence(id2, seqs_concat, cumul_seq_lengths);
             if !already_tested.contains(&(id1,id2)) {
-                let result = edlibAlignRs(s1, s2, &EdlibAlignConfigRs::default());
+                let result = edit_distance::edit_distance(str::from_utf8(s1).unwrap(), str::from_utf8(s2).unwrap());
                 already_tested.insert((id1,id2));
-                let d = result.editDistance as f64; 
+                let d = result as f64; 
                 if d < max(s1.len(), s2.len()) as f64 * 0.05 { // Less than 5% edit distance compared to the length of the longer sequence 
-                    eprintln!("({},{}): {}",id1, id2, result.editDistance);
+                    eprintln!("({},{}): {}",id1, id2, result);
                 }
                 
             }

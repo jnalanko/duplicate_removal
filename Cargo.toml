@@ -9,4 +9,4 @@ edition = "2021"
 my_seqio = { path = "my_seqio" }
 clap = { version = "4.0.26", features = ["derive"] }
 clap_complete = "4.0.6"
-edlib_rs = "0.1.2"
+edit-distance = "2.0.1"
