@@ -15,7 +15,7 @@ fn main() {
     let matches = cli::build_cli().get_matches();
 
     let reads_in = matches.get_one::<String>("reads").unwrap();
-    let k = matches.get_one::<usize>("k").unwrap();
+    let k: usize = matches.get_one::<String>("seed-length").unwrap().parse::<usize>().unwrap();
 
     let mut input = DynamicFastXReader::new_from_file(&reads_in);
     let mut seq_concat = Vec::<u8>::new();
@@ -36,8 +36,9 @@ fn main() {
     }
 
     eprintln!("Running partial suffix sort");
-    let partial_SA = partial_suffix_sort::partial_suffix_sort(&seq_concat, *k);
+    let partial_SA = partial_suffix_sort::partial_suffix_sort(&seq_concat, k);
 
+/*
     let n = partial_SA.len();
 
     let mut inverse_partial_SA = vec![0usize; n];
@@ -56,6 +57,7 @@ fn main() {
             }
         }
     }
+*/
 
 }
 
