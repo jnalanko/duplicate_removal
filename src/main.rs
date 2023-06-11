@@ -43,7 +43,7 @@ fn check_for_duplicates(doc_array: &Vec<usize>, cumul_seq_lengths: &Vec<usize>, 
                 already_tested.insert((id1,id2));
                 let d = result as f64; 
                 if d < max(s1.len(), s2.len()) as f64 * 0.05 { // Less than 5% edit distance compared to the length of the longer sequence 
-                    eprintln!("({},{}): {}",id1, id2, result);
+                    eprintln!("read {} (length {}) vs read {} (length {}): {}", id1, s1.len(), id2, s2.len(), result);
                 }
             }
         }
