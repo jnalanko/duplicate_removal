@@ -32,6 +32,10 @@ fn check_for_duplicates(doc_array: &Vec<usize>, cumul_seq_lengths: &Vec<usize>, 
         for j in i+1..SA_end{
             let id1 = doc_array[i];
             let id2 = doc_array[j];
+            if id1 == id2{
+                continue; // Same read
+            }
+
             let s1 = extract_sequence(id1, seqs_concat, cumul_seq_lengths);
             let s2 = extract_sequence(id2, seqs_concat, cumul_seq_lengths);
             if !already_tested.contains(&(id1,id2)) {
@@ -41,7 +45,6 @@ fn check_for_duplicates(doc_array: &Vec<usize>, cumul_seq_lengths: &Vec<usize>, 
                 if d < max(s1.len(), s2.len()) as f64 * 0.05 { // Less than 5% edit distance compared to the length of the longer sequence 
                     eprintln!("({},{}): {}",id1, id2, result);
                 }
-                
             }
         }
     }
