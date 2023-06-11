@@ -26,6 +26,7 @@ pub fn partial_suffix_sort(S: &Vec<u8>, mut k: usize) -> Vec<usize>{
 
     // k rounds of LSB radix sort
     for round in 0..k{
+        eprintln!("Round {}", round);
         let mut C = get_cumulative(&counts);
         // Sort the order vector by the k-mer starting at position i
         let mut new_order: Vec<usize> = vec![0; S.len()];
