@@ -37,7 +37,11 @@ fn check_for_duplicates(doc_array: &Vec<usize>, cumul_seq_lengths: &Vec<usize>, 
             if !already_tested.contains(&(id1,id2)) {
                 let result = edlibAlignRs(s1, s2, &EdlibAlignConfigRs::default());
                 already_tested.insert((id1,id2));
-                eprintln!("({},{}): {}",id1, id2, result.editDistance);
+                let d = result.editDistance as f64; 
+                if d < max(s1.len(), s2.len()) as f64 * 0.05 { // Less than 5% edit distance compared to the length of the longer sequence 
+                    eprintln!("({},{}): {}",id1, id2, result.editDistance);
+                }
+                
             }
         }
     }
