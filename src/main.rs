@@ -7,6 +7,7 @@ use my_seqio::reader::{DynamicFastXReader, FastXReader};
 use my_seqio::writer::DynamicFastXWriter;
 use edlib_rs::edlibrs::*;
 use core::cmp::{min,max};
+use std::collections::HashSet;
 
 mod cli;
 mod partial_suffix_sort;
@@ -21,17 +22,23 @@ fn extract_sequence<'a>(id: usize, seqs_concat: &'a Vec<u8>, cumul_seq_lengths: 
 }
 
 // End is one past the end
-fn check_for_duplicates(doc_array: &Vec<usize>, cumul_seq_lengths: &Vec<usize>, seqs_concat: &Vec<u8>, SA_start: usize, SA_end: usize){
+fn check_for_duplicates(doc_array: &Vec<usize>, cumul_seq_lengths: &Vec<usize>, seqs_concat: &Vec<u8>, already_tested: &mut HashSet<(usize,usize)>, SA_start: usize, SA_end: usize){
+    // A hash set of integers
     if SA_end - SA_start > 100 {
         return; // Too many occurrences to check all pairs
     }
 
     for i in SA_start..SA_end{
-        for j in i..SA_end{
-            let s1 = extract_sequence(doc_array[i], seqs_concat, cumul_seq_lengths);
-            let s2 = extract_sequence(doc_array[j], seqs_concat, cumul_seq_lengths);
-            let result = edlibAlignRs(s1, s2, &EdlibAlignConfigRs::default());
-            eprintln!("{}",result.editDistance);
+        for j in i+1..SA_end{
+            let id1 = doc_array[i];
+            let id2 = doc_array[j];
+            let s1 = extract_sequence(id1, seqs_concat, cumul_seq_lengths);
+            let s2 = extract_sequence(id2, seqs_concat, cumul_seq_lengths);
+            if !already_tested.contains(&(id1,id2)) {
+                let result = edlibAlignRs(s1, s2, &EdlibAlignConfigRs::default());
+                already_tested.insert((id1,id2));
+                eprintln!("({},{}): {}",id1, id2, result.editDistance);
+            }
         }
     }
 
@@ -105,13 +112,14 @@ fn main() {
     let mut kmer_run_start = 0 as usize;
     let mut n_runs: usize = 0;
     let mut max_run: usize = 0;
+    let mut already_tested = HashSet::<(usize,usize)>::new();
     for i in 0..n{
         let text_pos = partial_SA[i];
         if i > 0 {
             // Do we have the start of a new run?
             let prev_text_pos = partial_SA[i-1];
             if seqs_concat[text_pos..text_pos+k] != seqs_concat[prev_text_pos..prev_text_pos+k]{
-                check_for_duplicates(&doc_array, &cumul_seq_lengths, &seqs_concat, kmer_run_start, i);
+                check_for_duplicates(&doc_array, &cumul_seq_lengths, &seqs_concat, &mut already_tested, kmer_run_start, i);
                 n_runs += 1;
                 max_run = max(max_run, i - kmer_run_start);
                 kmer_run_start = i;
@@ -119,7 +127,7 @@ fn main() {
         }
     }
     // Last run
-    check_for_duplicates(&doc_array, &cumul_seq_lengths, &seqs_concat, kmer_run_start, n);
+    check_for_duplicates(&doc_array, &cumul_seq_lengths, &seqs_concat, &mut already_tested, kmer_run_start, n);
     n_runs += 1;
     max_run = max(max_run, n - kmer_run_start);
 
