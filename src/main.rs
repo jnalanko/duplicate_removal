@@ -121,6 +121,9 @@ fn main() {
     let mut max_run: usize = 0;
     let mut already_tested = HashSet::<(usize,usize)>::new();
     for i in 0..n{
+        if i % 10000 == 0{
+            eprintln!("Progress: {}", i as f64 / n as f64);
+        }
         let text_pos = partial_SA[i];
         if i > 0 {
             // Do we have the start of a new run?
