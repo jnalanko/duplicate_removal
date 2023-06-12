@@ -313,6 +313,7 @@ dependencies = [
  "clap_complete",
  "edit-distance",
  "my_seqio",
+ "triple_accel",
 ]
 
 [[package]]
