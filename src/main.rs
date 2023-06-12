@@ -107,6 +107,7 @@ fn main() {
             cumul_header_lengths.push(head.len() + cumul_header_lengths.last().unwrap());
         };
     }
+    seqs_concat.push(b'$'); // Make rust bio happy
     let n = seqs_concat.len();
 
     eprintln!("Running partial suffix sort");
