@@ -1,3 +1,5 @@
+use core::cmp::{min,max};
+
 fn get_cumulative(v: &Vec<u64>) -> Vec<u64>{
     let mut C = vec![0u64; v.len()];
     for i in 1..v.len(){

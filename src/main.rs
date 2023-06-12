@@ -8,6 +8,7 @@ use my_seqio::writer::DynamicFastXWriter;
 use edit_distance;
 use core::cmp::{min,max};
 use std::collections::HashSet;
+use bio::data_structures::suffix_array::suffix_array;
 
 mod cli;
 mod partial_suffix_sort;
@@ -109,7 +110,8 @@ fn main() {
     let n = seqs_concat.len();
 
     eprintln!("Running partial suffix sort");
-    let partial_SA = partial_suffix_sort::partial_suffix_sort(&seqs_concat, k);
+    //let partial_SA = partial_suffix_sort::partial_suffix_sort(&seqs_concat, k);
+    let partial_SA = suffix_array(seqs_concat.as_slice()); // Actual suffix array
     let doc_array = get_doc_array(&partial_SA, &cumul_seq_lengths);
 
     eprintln!("Finding k-mer runs");
