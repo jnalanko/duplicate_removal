@@ -10,5 +10,4 @@ my_seqio = { path = "my_seqio" }
 clap = { version = "4.0.26", features = ["derive"] }
 clap_complete = "4.0.6"
 edit-distance = "2.0.1"
-bio = "1.2.0"
 triple_accel = "0.4.0"
