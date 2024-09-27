@@ -8,6 +8,7 @@ use my_seqio::writer::DynamicFastXWriter;
 use edit_distance;
 use core::cmp::{min,max};
 use std::collections::HashSet;
+use indicatif::ProgressBar;
 
 mod cli;
 mod partial_suffix_sort;
@@ -25,6 +26,7 @@ fn extract_sequence<'a>(id: usize, seqs_concat: &'a Vec<u8>, cumul_seq_lengths: 
 fn check_for_duplicates(doc_array: &Vec<usize>, cumul_seq_lengths: &Vec<usize>, seqs_concat: &Vec<u8>, already_tested: &mut HashSet<(usize,usize)>, SA_start: usize, SA_end: usize){
     // A hash set of integers
     if SA_end - SA_start > 100 {
+        eprintln!("Warning: too many k-mer matches: {}", SA_end - SA_start);
         return; // Too many occurrences to check all pairs
     }
 
@@ -38,12 +40,15 @@ fn check_for_duplicates(doc_array: &Vec<usize>, cumul_seq_lengths: &Vec<usize>, 
 
             let s1 = extract_sequence(id1, seqs_concat, cumul_seq_lengths);
             let s2 = extract_sequence(id2, seqs_concat, cumul_seq_lengths);
-            if !already_tested.contains(&(id1,id2)) {
-                let result = edit_distance::edit_distance(str::from_utf8(s1).unwrap(), str::from_utf8(s2).unwrap());
-                already_tested.insert((id1,id2));
-                let d = result as f64; 
-                if d < max(s1.len(), s2.len()) as f64 * 0.05 { // Less than 5% edit distance compared to the length of the longer sequence 
-                    eprintln!("read {} (length {}) vs read {} (length {}): {}", id1, s1.len(), id2, s2.len(), result);
+            if (0.95..1.05).contains(&(s1.len() as f64 / s2.len() as f64)) {
+                // Relative length difference is within 5%
+                if !already_tested.contains(&(id1,id2)) {
+                    let result = edit_distance::edit_distance(str::from_utf8(s1).unwrap(), str::from_utf8(s2).unwrap());
+                    already_tested.insert((id1,id2));
+                    let d = result as f64; 
+                    if d < max(s1.len(), s2.len()) as f64 * 0.05 { // Less than 5% edit distance compared to the length of the longer sequence 
+                        eprintln!("read {} (length {}) vs read {} (length {}): {}", id1, s1.len(), id2, s2.len(), result);
+                    }
                 }
             }
         }
@@ -120,7 +125,10 @@ fn main() {
     let mut n_runs: usize = 0;
     let mut max_run: usize = 0;
     let mut already_tested = HashSet::<(usize,usize)>::new();
-    for i in 0..n{
+
+    let bar = ProgressBar::new(n as u64);
+    for i in 0..n {
+        bar.inc(1);
         let text_pos = partial_SA[i];
         if i > 0 {
             // Do we have the start of a new run?
@@ -137,6 +145,8 @@ fn main() {
     check_for_duplicates(&doc_array, &cumul_seq_lengths, &seqs_concat, &mut already_tested, kmer_run_start, n);
     n_runs += 1;
     max_run = max(max_run, n - kmer_run_start);
+
+    bar.finish();
 
     eprintln!("Found {} k-mer runs", n_runs);
     eprintln!("Average run lengths: {}", n as f64 / n_runs as f64);
